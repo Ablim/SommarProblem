@@ -1,0 +1,1 @@
+dotnet FileReader\bin\Debug\netcoreapp2.0\FileReader.dll | dotnet Problem2018\bin\Debug\netcoreapp2.0\Problem2018.dll

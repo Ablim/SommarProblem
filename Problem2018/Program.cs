@@ -1,12 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Problem2018
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        //Read map from STDIN
+        //Calculate fastest route from S to E
+        //Print steps to STDOUT
+        public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            while (true)
+            {
+                var s = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(s))
+                    break;
+
+                Console.WriteLine(s.Length);
+            }
         }
     }
 }
