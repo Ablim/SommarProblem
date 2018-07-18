@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdwardsLabyrinth", "Problem2018\EdwardsLabyrinth.csproj", "{4B1921D6-F601-48FC-8A21-129D9D406B26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdwardsLabyrinth", "EdwardsLabyrinth\EdwardsLabyrinth.csproj", "{4B1921D6-F601-48FC-8A21-129D9D406B26}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileReader", "FileReader\FileReader.csproj", "{3BB1AE1D-AB90-468F-B00B-5423647EC09D}"
 EndProject
