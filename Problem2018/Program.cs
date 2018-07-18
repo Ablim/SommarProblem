@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Problem2018
+namespace EdwardsLabyrinth
 {
     public class Program
     {
