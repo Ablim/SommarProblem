@@ -21,7 +21,7 @@ namespace EdwardsLabyrinth
             {
                 for (int w = 0; w < width; w++)
                 {
-                    map[h, w] = 'X';
+                    map[h, w] = '*';
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace EdwardsLabyrinth
             }
             else
             {
-                return 'X';
+                return '*';
             }
         }
 
