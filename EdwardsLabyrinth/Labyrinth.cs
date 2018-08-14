@@ -7,21 +7,24 @@ namespace EdwardsLabyrinth
 {
     public class Labyrinth
     {
-        private char[,] map;
-        private int width;
-        private int height;
+        private char[,] _map = null;
+        private int _width = 0;
+        private int _height = 0;
+        private List<(int row, int col)>[,] _graph = null;
+        private List<(int row, int col, int id)> _teleporters = new List<(int, int, int)>();
 
         private Labyrinth(int width, int height)
         {
-            this.width = width;
-            this.height = height;
-            map = new char[height, width];
+            _width = width;
+            _height = height;
+            _map = new char[height, width];
+            _graph = new List<(int, int)>[height, width];
 
             for (int h = 0; h < height; h++)
             {
                 for (int w = 0; w < width; w++)
                 {
-                    map[h, w] = '*';
+                    _map[h, w] = '*';
                 }
             }
         }
@@ -35,7 +38,7 @@ namespace EdwardsLabyrinth
                 for (int col = 0; col < line.Length; col++)
                 {
                     var c = line[col];
-                    map[row, col] = GetChar(c);
+                    _map[row, col] = GetChar(c);
                 }
 
                 row++;
@@ -64,11 +67,11 @@ namespace EdwardsLabyrinth
 
         private void PrintMap()
         {
-            for (int h = 0; h < height; h++)
+            for (int h = 0; h < _height; h++)
             {
-                for (int w = 0; w < width; w++)
+                for (int w = 0; w < _width; w++)
                 {
-                    Console.Write(map[h, w]);
+                    Console.Write(_map[h, w]);
                 }
 
                 Console.WriteLine();
@@ -77,7 +80,39 @@ namespace EdwardsLabyrinth
 
         private void CreateGraph()
         {
+            //Find teleports
+            for (int row = 0; row < _height; row++)
+            {
+                for (int col = 0; col < _width; col++)
+                {
+                    var cell = _map[row, col].ToString();
+                    var isTeleporter = int.TryParse(cell, out int teleporter);
 
+                    if (isTeleporter)
+                    {
+                        //Console.WriteLine($"{row}, {col}: {teleporter}");
+                        _teleporters.Add((row: row, col: col, id: teleporter));
+                    }
+                }
+            }
+
+            //Create traversal graph
+            for (int row = 0; row < _height; row++)
+            {
+                for (int col = 0; col < _width; col++)
+                {
+                    var cell = _map[row, col];
+                    
+                    if (cell == ' ' || cell == 'S')
+                    {
+                        //Is normal or start cell
+                    }
+                    else if (int.TryParse(cell.ToString(), out int dontCare))
+                    {
+                        //Is teleporter
+                    }
+                }
+            }
         }
 
         private void Solve()
@@ -95,6 +130,9 @@ namespace EdwardsLabyrinth
 
             var lab = new Labyrinth(width, height);
             lab.ParseLinesToMap(mapLines);
+            //No we have something to work with
+
+
             lab.CreateGraph();
             lab.Solve();
             lab.PrintMap();
