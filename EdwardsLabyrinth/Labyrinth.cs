@@ -163,18 +163,14 @@ namespace EdwardsLabyrinth
 
         private void Solve()
         {
-
+            //Find shortest path from S to E
         }
 
         public string GetStepsToExit()
         {
             CreateGraph();
-
             Solve();
             PrintMap();
-
-
-
             return _path;
         }
     }
