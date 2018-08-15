@@ -8,25 +8,31 @@ namespace EdwardsLabyrinth
     public class Labyrinth
     {
         private char[,] _map = null;
+        private string _path = "";
         private int _width = 0;
         private int _height = 0;
         private List<(int row, int col)>[,] _graph = null;
-        private List<(int row, int col, int id)> _teleporters = new List<(int, int, int)>();
+        private List<(int row, int col, char id)> _teleporters = new List<(int, int, char)>();
 
-        private Labyrinth(int width, int height)
+        public Labyrinth(IEnumerable<string> mapLines)
         {
-            _width = width;
-            _height = height;
-            _map = new char[height, width];
-            _graph = new List<(int, int)>[height, width];
+            _width = mapLines
+                .OrderByDescending(x => x.Length)
+                .First()
+                .Length;
+            _height = mapLines.Count();
+            _map = new char[_height, _width];
+            _graph = new List<(int, int)>[_height, _width];
 
-            for (int h = 0; h < height; h++)
+            for (int h = 0; h < _height; h++)
             {
-                for (int w = 0; w < width; w++)
+                for (int w = 0; w < _width; w++)
                 {
                     _map[h, w] = '*';
                 }
             }
+
+            ParseLinesToMap(mapLines);
         }
 
         private void ParseLinesToMap(IEnumerable<string> lines)
@@ -38,26 +44,18 @@ namespace EdwardsLabyrinth
                 for (int col = 0; col < line.Length; col++)
                 {
                     var c = line[col];
-                    _map[row, col] = GetChar(c);
+                    _map[row, col] = ParseCell(c);
                 }
 
                 row++;
             }
         }
 
-        private char GetChar(char c)
+        private char ParseCell(char cell)
         {
-            /*
-             * Valid:
-             * -Numbers
-             * -'*'
-             * -' '
-             * -'S'
-             * -'E'
-             */
-            if (((int)c >= 48 && (int)c <= 57) || c == ' ' || c == 'S' || c == 'E')
+            if (IsWalkableCell(cell))
             {
-                return c;
+                return cell;
             }
             else
             {
@@ -85,13 +83,11 @@ namespace EdwardsLabyrinth
             {
                 for (int col = 0; col < _width; col++)
                 {
-                    var cell = _map[row, col].ToString();
-                    var isTeleporter = int.TryParse(cell, out int teleporter);
+                    var cell = _map[row, col];
 
-                    if (isTeleporter)
+                    if (IsTeleporter(cell))
                     {
-                        //Console.WriteLine($"{row}, {col}: {teleporter}");
-                        _teleporters.Add((row: row, col: col, id: teleporter));
+                        _teleporters.Add((row: row, col: col, id: cell));
                     }
                 }
             }
@@ -103,16 +99,66 @@ namespace EdwardsLabyrinth
                 {
                     var cell = _map[row, col];
                     
-                    if (cell == ' ' || cell == 'S')
+                    if (IsWalkableCell(cell))
                     {
-                        //Is normal or start cell
-                    }
-                    else if (int.TryParse(cell.ToString(), out int dontCare))
-                    {
-                        //Is teleporter
+                        _graph[row, col] = new List<(int row, int col)>();
+
+                        //North
+                        if (IsWithinBounds(row - 1, col) && IsWalkableCell(_map[row - 1, col]))
+                            _graph[row, col].Add((row - 1, col));
+
+                        //South
+                        if (IsWithinBounds(row + 1, col) && IsWalkableCell(_map[row + 1, col]))
+                            _graph[row, col].Add((row + 1, col));
+                        
+                        //East
+                        if (IsWithinBounds(row, col + 1) && IsWalkableCell(_map[row, col + 1]))
+                            _graph[row, col].Add((row, col + 1));
+                        
+                        //West
+                        if (IsWithinBounds(row, col - 1) && IsWalkableCell(_map[row, col - 1]))
+                            _graph[row, col].Add((row, col - 1));
+
+                        if (IsTeleporter(cell))
+                        {
+                            var otherTeleporters = _teleporters.Where(t => t.id == cell && (t.row != row || t.col != col));
+
+                            if (otherTeleporters.Any())
+                            {
+                                var other = otherTeleporters.First();
+                                _graph[row, col].Add((other.row, other.col));
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        private bool IsWithinBounds(int row, int col)
+        {
+            if (row >= 0 && row < _height && col >= 0 && col < _width)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool IsWalkableCell(char cell)
+        {
+            return IsTeleporter(cell) || cell == ' ' || cell == 'S' || IsEnd(cell);
+        }
+
+        private bool IsTeleporter(char cell)
+        {
+            return ((int)cell >= 48 && (int)cell <= 57);
+        }
+
+        private bool IsEnd(char cell)
+        {
+            return cell == 'E';
         }
 
         private void Solve()
@@ -120,26 +166,16 @@ namespace EdwardsLabyrinth
 
         }
 
-        public static string GetStepsToExit(IEnumerable<string> mapLines)
+        public string GetStepsToExit()
         {
-            var width = mapLines
-                .OrderByDescending(x => x.Length)
-                .First()
-                .Length;
-            var height = mapLines.Count();
+            CreateGraph();
 
-            var lab = new Labyrinth(width, height);
-            lab.ParseLinesToMap(mapLines);
-            //No we have something to work with
-
-
-            lab.CreateGraph();
-            lab.Solve();
-            lab.PrintMap();
+            Solve();
+            PrintMap();
 
 
 
-            return "";
+            return _path;
         }
     }
 }

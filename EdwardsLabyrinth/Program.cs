@@ -9,8 +9,8 @@ namespace EdwardsLabyrinth
         public static void Main(string[] args)
         {
             var input = ReadInput();
-            var steps = Labyrinth.GetStepsToExit(input);
-            Console.WriteLine(steps);
+            var lab = new Labyrinth(input);
+            Console.WriteLine(lab.GetStepsToExit());
         }
 
         private static IEnumerable<string> ReadInput()
