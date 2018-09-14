@@ -11,7 +11,6 @@ namespace EdwardsLabyrinth
         private int _height;
         private char[,] _map;
         private List<(int row, int col)>[,] _graph;
-        private string _path;
         private List<(int row, int col, char id)> _teleporters;
 
         public Labyrinth(IEnumerable<string> mapLines)
@@ -141,17 +140,12 @@ namespace EdwardsLabyrinth
             return cell == 'E';
         }
 
-        private void Solve()
+        public string Solve()
         {
             //Find shortest path from S to E
-        }
-
-        public string GetStepsToExit()
-        {
             PrintMap();
             CreateGraph();
-            Solve();
-            return _path;
+            return "";
         }
     }
 }
