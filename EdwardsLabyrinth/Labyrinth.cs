@@ -7,30 +7,20 @@ namespace EdwardsLabyrinth
 {
     public class Labyrinth
     {
-        private char[,] _map = null;
-        private string _path = "";
-        private int _width = 0;
-        private int _height = 0;
-        private List<(int row, int col)>[,] _graph = null;
-        private List<(int row, int col, char id)> _teleporters = new List<(int, int, char)>();
+        private int _width;
+        private int _height;
+        private char[,] _map;
+        private List<(int row, int col)>[,] _graph;
+        private string _path;
+        private List<(int row, int col, char id)> _teleporters;
 
         public Labyrinth(IEnumerable<string> mapLines)
         {
-            _width = mapLines
-                .OrderByDescending(x => x.Length)
-                .First()
-                .Length;
+            _width = mapLines.OrderByDescending(x => x.Length).First().Length;
             _height = mapLines.Count();
             _map = new char[_height, _width];
             _graph = new List<(int, int)>[_height, _width];
-
-            for (int h = 0; h < _height; h++)
-            {
-                for (int w = 0; w < _width; w++)
-                {
-                    _map[h, w] = '*';
-                }
-            }
+            _teleporters = new List<(int, int, char)>();
 
             ParseLinesToMap(mapLines);
         }
@@ -43,8 +33,7 @@ namespace EdwardsLabyrinth
             {
                 for (int col = 0; col < line.Length; col++)
                 {
-                    var c = line[col];
-                    _map[row, col] = ParseCell(c);
+                    _map[row, col] = ParseCell(line[col]);
                 }
 
                 row++;
@@ -86,9 +75,7 @@ namespace EdwardsLabyrinth
                     var cell = _map[row, col];
 
                     if (IsTeleporter(cell))
-                    {
                         _teleporters.Add((row: row, col: col, id: cell));
-                    }
                 }
             }
 
@@ -136,14 +123,7 @@ namespace EdwardsLabyrinth
 
         private bool IsWithinBounds(int row, int col)
         {
-            if (row >= 0 && row < _height && col >= 0 && col < _width)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return (row >= 0 && row < _height && col >= 0 && col < _width);
         }
 
         private bool IsWalkableCell(char cell)
@@ -168,9 +148,9 @@ namespace EdwardsLabyrinth
 
         public string GetStepsToExit()
         {
+            PrintMap();
             CreateGraph();
             Solve();
-            PrintMap();
             return _path;
         }
     }
