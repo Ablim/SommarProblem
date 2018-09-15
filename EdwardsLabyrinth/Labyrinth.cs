@@ -12,6 +12,10 @@ namespace EdwardsLabyrinth
         private char[,] _map;
         private List<(int row, int col)>[,] _graph;
         private List<(int row, int col, char id)> _teleporters;
+        private int _startID;
+        private int _endID;
+        private Dictionary<int, (int row, int col)> _coordinateLookup;
+        private Dictionary<(int row, int col), int> _idLookup;
 
         public Labyrinth(IEnumerable<string> mapLines)
         {
@@ -20,6 +24,8 @@ namespace EdwardsLabyrinth
             _map = new char[_height, _width];
             _graph = new List<(int, int)>[_height, _width];
             _teleporters = new List<(int, int, char)>();
+            _coordinateLookup = new Dictionary<int, (int row, int col)>();
+            _idLookup = new Dictionary<(int row, int col), int>();
 
             ParseLinesToMap(mapLines);
         }
@@ -78,6 +84,8 @@ namespace EdwardsLabyrinth
                 }
             }
 
+            var counter = 0;
+            
             //Create traversal graph
             for (int row = 0; row < _height; row++)
             {
@@ -87,6 +95,15 @@ namespace EdwardsLabyrinth
                     
                     if (IsWalkableCell(cell))
                     {
+                        if (IsStart(cell))
+                            _startID = counter;
+                        else if (IsEnd(cell))
+                            _endID = counter;
+
+                        _coordinateLookup.Add(counter, (row, col));
+                        _idLookup.Add((row, col), counter);
+                        counter++;
+
                         _graph[row, col] = new List<(int row, int col)>();
 
                         //North
@@ -127,7 +144,7 @@ namespace EdwardsLabyrinth
 
         private bool IsWalkableCell(char cell)
         {
-            return IsTeleporter(cell) || cell == ' ' || cell == 'S' || IsEnd(cell);
+            return IsTeleporter(cell) || cell == ' ' || IsStart(cell) || IsEnd(cell);
         }
 
         private bool IsTeleporter(char cell)
@@ -140,11 +157,71 @@ namespace EdwardsLabyrinth
             return cell == 'E';
         }
 
+        private bool IsStart(char cell)
+        {
+            return cell == 'S';
+        }
+
+        //Find shortest path from S to E
         public string Solve()
         {
-            //Find shortest path from S to E
             PrintMap();
             CreateGraph();
+
+            var nodesToTest = new List<int>();
+            nodesToTest.Add(_startID);
+
+            var costLookup = new Dictionary<int, (int from, int cost)>();
+            costLookup.Add(_startID, (_startID, 0));
+
+            while (nodesToTest.Count > 0)
+            {
+                var nodeID = nodesToTest.First();
+                nodesToTest.RemoveAt(0);
+                var nodeCoordinates = _coordinateLookup[nodeID];
+                var nodeCost = costLookup[nodeID].cost;
+                var nodeIsTeleporter = IsTeleporter(_map[nodeCoordinates.row, nodeCoordinates.col]);
+                var adjacentNodes = _graph[nodeCoordinates.row, nodeCoordinates.col];
+
+                foreach (var neighbor in adjacentNodes)
+                {
+                    var neighborID = _idLookup[neighbor];
+                    var neighborCoordinates = _coordinateLookup[neighborID];
+                    var neighborIsTeleporter = IsTeleporter(_map[neighborCoordinates.row, neighborCoordinates.col]);
+                    var exists = costLookup.TryGetValue(neighborID, out (int from, int cost) neighborCost);
+
+                    if (!exists)
+                    {
+                        if (nodeIsTeleporter && neighborIsTeleporter)
+                            costLookup.Add(neighborID, (nodeID, nodeCost));
+                        else
+                            costLookup.Add(neighborID, (nodeID, nodeCost + 1));
+
+                        nodesToTest.Add(neighborID);
+                    }
+                    else if (nodeCost < neighborCost.cost)
+                    {
+                        costLookup[neighborID] = nodeIsTeleporter && neighborIsTeleporter ? (nodeID, nodeCost) : (nodeID, nodeCost + 1);
+                        nodesToTest.Add(neighborID);
+                    }
+                }
+            }
+
+            var id = _endID;
+
+            do
+            {
+                var coordinates = _coordinateLookup[id];
+                Console.WriteLine($"{id}: {coordinates.row}, {coordinates.col}");
+                id = costLookup[id].from;
+            }
+            while (id != _startID);
+
+            return PrintPath(costLookup);
+        }
+
+        private string PrintPath(Dictionary<int, (int from, int cost)> costLookup)
+        {
             return "";
         }
     }
