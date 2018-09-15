@@ -162,10 +162,10 @@ namespace EdwardsLabyrinth
             return cell == 'S';
         }
 
-        //Find shortest path from S to E
+        //Find shortest path from S to E.
         public string Solve()
         {
-            PrintMap();
+            //PrintMap();
             CreateGraph();
 
             var nodesToTest = new List<int>();
@@ -207,22 +207,44 @@ namespace EdwardsLabyrinth
                 }
             }
 
-            var id = _endID;
-
-            do
-            {
-                var coordinates = _coordinateLookup[id];
-                Console.WriteLine($"{id}: {coordinates.row}, {coordinates.col}");
-                id = costLookup[id].from;
-            }
-            while (id != _startID);
-
             return PrintPath(costLookup);
         }
 
+        //Get path by backtracking.
         private string PrintPath(Dictionary<int, (int from, int cost)> costLookup)
         {
-            return "";
+            var id = _endID;
+            var coordinates = _coordinateLookup[id];
+            var isTeleporter = IsTeleporter(_map[coordinates.row, coordinates.col]);
+            var result = new List<string>();
+
+            while (id != _startID)
+            {
+                var nextID = costLookup[id].from;
+                var nextCoordinates = _coordinateLookup[nextID];
+                var nextIsTeleporter = IsTeleporter(_map[nextCoordinates.row, nextCoordinates.col]);
+
+                if (!(nextIsTeleporter && isTeleporter))
+                    result.Insert(0, GetDirection(nextCoordinates, coordinates));
+
+                id = nextID;
+                coordinates = nextCoordinates;
+                isTeleporter = nextIsTeleporter;
+            }
+
+            return string.Join(" ", result);
+        }
+
+        private string GetDirection((int row, int col) from, (int row, int col) to)
+        {
+            if (from.row > to.row)
+                return "N";
+            else if (from.row < to.row)
+                return "S";
+            else if (from.col < to.col)
+                return "E";
+            else
+                return "W";
         }
     }
 }
