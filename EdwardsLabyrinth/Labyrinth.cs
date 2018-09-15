@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace EdwardsLabyrinth
 {
@@ -168,16 +167,18 @@ namespace EdwardsLabyrinth
             //PrintMap();
             CreateGraph();
 
-            var nodesToTest = new List<int>();
+            var nodesToTest = new HashSet<int>();
             nodesToTest.Add(_startID);
 
             var costLookup = new Dictionary<int, (int from, int cost)>();
             costLookup.Add(_startID, (_startID, 0));
 
+            var visitedNodes = new HashSet<int>();
+
             while (nodesToTest.Count > 0)
             {
                 var nodeID = nodesToTest.First();
-                nodesToTest.RemoveAt(0);
+                nodesToTest.Remove(nodeID);
                 var nodeCoordinates = _coordinateLookup[nodeID];
                 var nodeCost = costLookup[nodeID].cost;
                 var nodeIsTeleporter = IsTeleporter(_map[nodeCoordinates.row, nodeCoordinates.col]);
@@ -186,6 +187,10 @@ namespace EdwardsLabyrinth
                 foreach (var neighbor in adjacentNodes)
                 {
                     var neighborID = _idLookup[neighbor];
+
+                    if (visitedNodes.Contains(neighborID))
+                        continue;
+
                     var neighborCoordinates = _coordinateLookup[neighborID];
                     var neighborIsTeleporter = IsTeleporter(_map[neighborCoordinates.row, neighborCoordinates.col]);
                     var exists = costLookup.TryGetValue(neighborID, out (int from, int cost) neighborCost);
@@ -197,13 +202,18 @@ namespace EdwardsLabyrinth
                         else
                             costLookup.Add(neighborID, (nodeID, nodeCost + 1));
 
-                        nodesToTest.Add(neighborID);
+                        if (!nodesToTest.Contains(neighborID))
+                            nodesToTest.Add(neighborID);
                     }
                     else if (nodeCost < neighborCost.cost)
                     {
                         costLookup[neighborID] = nodeIsTeleporter && neighborIsTeleporter ? (nodeID, nodeCost) : (nodeID, nodeCost + 1);
-                        nodesToTest.Add(neighborID);
+
+                        if (!nodesToTest.Contains(neighborID))
+                            nodesToTest.Add(neighborID);
                     }
+
+                    visitedNodes.Add(nodeID);
                 }
             }
 
