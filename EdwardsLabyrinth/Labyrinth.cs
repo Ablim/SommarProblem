@@ -127,8 +127,8 @@ namespace EdwardsLabyrinth
             PrintMap();
             CreateGraph();
 
-            var nodesToTest = new HashSet<int>();
-            nodesToTest.Add(_startID);
+            var nodesToTest = new List<(int id, int cost)>();
+            nodesToTest.Add((_startID, 0));
 
             var costLookup = new Dictionary<int, (int from, int cost)>();
             costLookup.Add(_startID, (_startID, 0));
@@ -137,8 +137,10 @@ namespace EdwardsLabyrinth
 
             while (nodesToTest.Count > 0)
             {
-                var nodeID = nodesToTest.First();
-                nodesToTest.Remove(nodeID);
+                var nodeToTest = nodesToTest.First();
+                var nodeID = nodeToTest.id;
+                nodesToTest.Remove(nodeToTest);
+                visitedNodes.Add(nodeID);
                 var nodeCoordinates = _coordinateLookup[nodeID];
                 var nodeCost = costLookup[nodeID].cost;
                 var nodeIsTeleporter = Utils.IsTeleporter(_map[nodeCoordinates.row, nodeCoordinates.col]);
@@ -147,10 +149,6 @@ namespace EdwardsLabyrinth
                 foreach (var neighbor in adjacentNodes)
                 {
                     var neighborID = _idLookup[neighbor];
-
-                    if (visitedNodes.Contains(neighborID))
-                        continue;
-
                     var neighborCoordinates = _coordinateLookup[neighborID];
                     var neighborIsTeleporter = Utils.IsTeleporter(_map[neighborCoordinates.row, neighborCoordinates.col]);
                     var exists = costLookup.TryGetValue(neighborID, out (int from, int cost) neighborCost);
@@ -162,26 +160,39 @@ namespace EdwardsLabyrinth
                         else
                             costLookup.Add(neighborID, (nodeID, nodeCost + 1));
 
-                        if (!nodesToTest.Contains(neighborID))
-                            nodesToTest.Add(neighborID);
                     }
                     else if (nodeCost < neighborCost.cost)
                     {
                         costLookup[neighborID] = nodeIsTeleporter && neighborIsTeleporter ? (nodeID, nodeCost) : (nodeID, nodeCost + 1);
-
-                        if (!nodesToTest.Contains(neighborID))
-                            nodesToTest.Add(neighborID);
                     }
 
-                    visitedNodes.Add(nodeID);
+                    if (!visitedNodes.Contains(neighborID))
+                    {
+                        var temp = nodesToTest.Where(x => x.id == neighborID);
+
+                        if (!temp.Any())
+                        {
+                            nodesToTest.Add((neighborID, costLookup[neighborID].cost));
+                        }
+                        else
+                        {
+                            var temp2 = temp.First();
+                            temp2.cost = costLookup[neighborID].cost;
+                        }
+                    }
                 }
+
+                nodesToTest.Sort((x, y) => x.cost.CompareTo(y.cost));
+
+                if (nodesToTest.Any())
+                    Console.WriteLine($"{nodesToTest.First().id}, {nodesToTest.First().cost}, {nodesToTest.Count}");
             }
 
-            return PrintPath(costLookup);
+            return GetPath(costLookup);
         }
 
         //Get path by backtracking.
-        private string PrintPath(Dictionary<int, (int from, int cost)> costLookup)
+        private string GetPath(Dictionary<int, (int from, int cost)> costLookup)
         {
             var id = _endID;
             var coordinates = _coordinateLookup[id];
@@ -194,7 +205,7 @@ namespace EdwardsLabyrinth
                 var nextCoordinates = _coordinateLookup[nextID];
                 var nextIsTeleporter = Utils.IsTeleporter(_map[nextCoordinates.row, nextCoordinates.col]);
 
-                if (!(nextIsTeleporter && isTeleporter))
+                if (!nextIsTeleporter || !isTeleporter)
                     result.Insert(0, GetDirection(nextCoordinates, coordinates));
 
                 id = nextID;
