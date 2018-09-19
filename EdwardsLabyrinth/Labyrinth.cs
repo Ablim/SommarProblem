@@ -16,6 +16,9 @@ namespace EdwardsLabyrinth
         private Dictionary<int, (int row, int col)> _coordinateLookup;
         private Dictionary<(int row, int col), int> _idLookup;
 
+        /// <summary>
+        /// Create a Labyrinth.
+        /// </summary>
         public Labyrinth(IEnumerable<string> mapLines)
         {
             _width = mapLines.OrderByDescending(x => x.Length).First().Length;
@@ -48,7 +51,10 @@ namespace EdwardsLabyrinth
             }
         }
 
-        private void PrintMap()
+        /// <summary>
+        /// Print the internal map representation of the Labyrinth.
+        /// </summary>
+        public void PrintMap()
         {
             for (int h = 0; h < _height; h++)
             {
@@ -121,10 +127,11 @@ namespace EdwardsLabyrinth
             return (row >= 0 && row < _height && col >= 0 && col < _width);
         }
 
-        //Find shortest path from S to E.
+        /// <summary>
+        /// Find and return the path from S to E.
+        /// </summary>
         public string Solve()
         {
-            PrintMap();
             CreateGraph();
 
             var nodesToTest = new List<(int id, int cost)>();
@@ -183,15 +190,11 @@ namespace EdwardsLabyrinth
                 }
 
                 nodesToTest.Sort((x, y) => x.cost.CompareTo(y.cost));
-
-                if (nodesToTest.Any())
-                    Console.WriteLine($"{nodesToTest.First().id}, {nodesToTest.First().cost}, {nodesToTest.Count}");
             }
 
             return GetPath(costLookup);
         }
 
-        //Get path by backtracking.
         private string GetPath(Dictionary<int, (int from, int cost)> costLookup)
         {
             var id = _endID;

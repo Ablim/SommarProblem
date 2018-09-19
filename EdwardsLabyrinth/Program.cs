@@ -10,6 +10,7 @@ namespace EdwardsLabyrinth
         {
             var input = ReadInput();
             var lab = new Labyrinth(input);
+            lab.PrintMap();
             Console.WriteLine(lab.Solve());
         }
 
