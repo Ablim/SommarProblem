@@ -134,8 +134,8 @@ namespace EdwardsLabyrinth
         {
             CreateGraph();
 
-            var nodesToTest = new List<(int id, int cost)>();
-            nodesToTest.Add((_startID, 0));
+            var nodesToTest = new PriorityQueueWithList<int, int>();
+            nodesToTest.Add(_startID, 0);
 
             var costLookup = new Dictionary<int, (int from, int cost)>();
             costLookup.Add(_startID, (_startID, 0));
@@ -144,9 +144,8 @@ namespace EdwardsLabyrinth
 
             while (nodesToTest.Count > 0)
             {
-                var nodeToTest = nodesToTest.First();
-                var nodeID = nodeToTest.id;
-                nodesToTest.Remove(nodeToTest);
+                var nodeToTest = nodesToTest.GetMin();
+                var nodeID = nodeToTest.key;
                 visitedNodes.Add(nodeID);
                 var nodeCoordinates = _coordinateLookup[nodeID];
                 var nodeCost = costLookup[nodeID].cost;
@@ -166,7 +165,6 @@ namespace EdwardsLabyrinth
                             costLookup.Add(neighborID, (nodeID, nodeCost));
                         else
                             costLookup.Add(neighborID, (nodeID, nodeCost + 1));
-
                     }
                     else if (nodeCost < neighborCost.cost)
                     {
@@ -175,21 +173,9 @@ namespace EdwardsLabyrinth
 
                     if (!visitedNodes.Contains(neighborID))
                     {
-                        var temp = nodesToTest.Where(x => x.id == neighborID);
-
-                        if (!temp.Any())
-                        {
-                            nodesToTest.Add((neighborID, costLookup[neighborID].cost));
-                        }
-                        else
-                        {
-                            var temp2 = temp.First();
-                            temp2.cost = costLookup[neighborID].cost;
-                        }
+                        nodesToTest.Add(neighborID, costLookup[neighborID].cost);
                     }
                 }
-
-                nodesToTest.Sort((x, y) => x.cost.CompareTo(y.cost));
             }
 
             return GetPath(costLookup);
