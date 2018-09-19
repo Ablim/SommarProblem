@@ -26,10 +26,10 @@ namespace EdwardsLabyrinth
             _coordinateLookup = new Dictionary<int, (int row, int col)>();
             _idLookup = new Dictionary<(int row, int col), int>();
 
-            ParseLinesToMap(mapLines);
+            CreateMap(mapLines);
         }
 
-        private void ParseLinesToMap(IEnumerable<string> lines)
+        private void CreateMap(IEnumerable<string> lines)
         {
             var row = 0;
 
@@ -37,22 +37,14 @@ namespace EdwardsLabyrinth
             {
                 for (int col = 0; col < line.Length; col++)
                 {
-                    _map[row, col] = ParseCell(line[col]);
+                    var cell = line[col];
+                    _map[row, col] = cell;
+
+                    if (Utils.IsTeleporter(cell))
+                        _teleporters.Add((row: row, col: col, id: cell));
                 }
 
                 row++;
-            }
-        }
-
-        private char ParseCell(char cell)
-        {
-            if (IsWalkableCell(cell))
-            {
-                return cell;
-            }
-            else
-            {
-                return '*';
             }
         }
 
@@ -71,18 +63,6 @@ namespace EdwardsLabyrinth
 
         private void CreateGraph()
         {
-            //Find teleports
-            for (int row = 0; row < _height; row++)
-            {
-                for (int col = 0; col < _width; col++)
-                {
-                    var cell = _map[row, col];
-
-                    if (IsTeleporter(cell))
-                        _teleporters.Add((row: row, col: col, id: cell));
-                }
-            }
-
             var counter = 0;
             
             //Create traversal graph
@@ -92,11 +72,11 @@ namespace EdwardsLabyrinth
                 {
                     var cell = _map[row, col];
                     
-                    if (IsWalkableCell(cell))
+                    if (Utils.IsWalkableCell(cell))
                     {
-                        if (IsStart(cell))
+                        if (Utils.IsStart(cell))
                             _startID = counter;
-                        else if (IsEnd(cell))
+                        else if (Utils.IsEnd(cell))
                             _endID = counter;
 
                         _coordinateLookup.Add(counter, (row, col));
@@ -106,22 +86,22 @@ namespace EdwardsLabyrinth
                         _graph[row, col] = new List<(int row, int col)>();
 
                         //North
-                        if (IsWithinBounds(row - 1, col) && IsWalkableCell(_map[row - 1, col]))
+                        if (IsWithinBounds(row - 1, col) && Utils.IsWalkableCell(_map[row - 1, col]))
                             _graph[row, col].Add((row - 1, col));
 
                         //South
-                        if (IsWithinBounds(row + 1, col) && IsWalkableCell(_map[row + 1, col]))
+                        if (IsWithinBounds(row + 1, col) && Utils.IsWalkableCell(_map[row + 1, col]))
                             _graph[row, col].Add((row + 1, col));
                         
                         //East
-                        if (IsWithinBounds(row, col + 1) && IsWalkableCell(_map[row, col + 1]))
+                        if (IsWithinBounds(row, col + 1) && Utils.IsWalkableCell(_map[row, col + 1]))
                             _graph[row, col].Add((row, col + 1));
                         
                         //West
-                        if (IsWithinBounds(row, col - 1) && IsWalkableCell(_map[row, col - 1]))
+                        if (IsWithinBounds(row, col - 1) && Utils.IsWalkableCell(_map[row, col - 1]))
                             _graph[row, col].Add((row, col - 1));
 
-                        if (IsTeleporter(cell))
+                        if (Utils.IsTeleporter(cell))
                         {
                             var otherTeleporters = _teleporters.Where(t => t.id == cell && (t.row != row || t.col != col));
 
@@ -141,30 +121,10 @@ namespace EdwardsLabyrinth
             return (row >= 0 && row < _height && col >= 0 && col < _width);
         }
 
-        private bool IsWalkableCell(char cell)
-        {
-            return IsTeleporter(cell) || cell == ' ' || IsStart(cell) || IsEnd(cell);
-        }
-
-        private bool IsTeleporter(char cell)
-        {
-            return ((int)cell >= 48 && (int)cell <= 57);
-        }
-
-        private bool IsEnd(char cell)
-        {
-            return cell == 'E';
-        }
-
-        private bool IsStart(char cell)
-        {
-            return cell == 'S';
-        }
-
         //Find shortest path from S to E.
         public string Solve()
         {
-            //PrintMap();
+            PrintMap();
             CreateGraph();
 
             var nodesToTest = new HashSet<int>();
@@ -181,7 +141,7 @@ namespace EdwardsLabyrinth
                 nodesToTest.Remove(nodeID);
                 var nodeCoordinates = _coordinateLookup[nodeID];
                 var nodeCost = costLookup[nodeID].cost;
-                var nodeIsTeleporter = IsTeleporter(_map[nodeCoordinates.row, nodeCoordinates.col]);
+                var nodeIsTeleporter = Utils.IsTeleporter(_map[nodeCoordinates.row, nodeCoordinates.col]);
                 var adjacentNodes = _graph[nodeCoordinates.row, nodeCoordinates.col];
 
                 foreach (var neighbor in adjacentNodes)
@@ -192,7 +152,7 @@ namespace EdwardsLabyrinth
                         continue;
 
                     var neighborCoordinates = _coordinateLookup[neighborID];
-                    var neighborIsTeleporter = IsTeleporter(_map[neighborCoordinates.row, neighborCoordinates.col]);
+                    var neighborIsTeleporter = Utils.IsTeleporter(_map[neighborCoordinates.row, neighborCoordinates.col]);
                     var exists = costLookup.TryGetValue(neighborID, out (int from, int cost) neighborCost);
 
                     if (!exists)
@@ -225,14 +185,14 @@ namespace EdwardsLabyrinth
         {
             var id = _endID;
             var coordinates = _coordinateLookup[id];
-            var isTeleporter = IsTeleporter(_map[coordinates.row, coordinates.col]);
+            var isTeleporter = Utils.IsTeleporter(_map[coordinates.row, coordinates.col]);
             var result = new List<string>();
 
             while (id != _startID)
             {
                 var nextID = costLookup[id].from;
                 var nextCoordinates = _coordinateLookup[nextID];
-                var nextIsTeleporter = IsTeleporter(_map[nextCoordinates.row, nextCoordinates.col]);
+                var nextIsTeleporter = Utils.IsTeleporter(_map[nextCoordinates.row, nextCoordinates.col]);
 
                 if (!(nextIsTeleporter && isTeleporter))
                     result.Insert(0, GetDirection(nextCoordinates, coordinates));
