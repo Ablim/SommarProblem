@@ -1,1 +1,1 @@
-type Map.txt | dotnet EdwardsLabyrinth\bin\Debug\netcoreapp2.0\EdwardsLabyrinth.dll
+type Map3.txt | dotnet run --project EdwardsLabyrinth\EdwardsLabyrinth.csproj
