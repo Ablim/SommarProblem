@@ -13,19 +13,18 @@ namespace EdwardsLabyrinth
         where T : IComparable<T>
     {
         private T[] _heap;
-        private int _size;
 
         public MinHeap()
         {
             _heap = new T[10];
-            _size = 0;
+            Count = 0;
         }
 
-        public int Count { get { return _size; } }
+        public int Count { get; private set; }
 
         public T Peek()
         {
-            if (_size == 0)
+            if (Count == 0)
                 throw new InvalidOperationException();
 
             return _heap[0];
@@ -33,7 +32,7 @@ namespace EdwardsLabyrinth
 
         public T Pop()
         {
-            if (_size == 0)
+            if (Count == 0)
                 throw new InvalidOperationException();
 
             var root = _heap[0];
@@ -43,22 +42,22 @@ namespace EdwardsLabyrinth
 
         public void Push(T item)
         {
-            if (_size == _heap.Length)
+            if (Count == _heap.Length)
                 Resize();
 
-            _heap[_size] = item;
-            SiftUp(_size);
-            _size++;
+            _heap[Count] = item;
+            SiftUp(Count);
+            Count++;
         }
 
         public void DeleteRoot()
         {
-            if (_size == 0)
+            if (Count == 0)
                 return;
 
-            _heap[0] = _heap[_size - 1];
+            _heap[0] = _heap[Count - 1];
             SiftDown(0);
-            _size--;
+            Count--;
         }
 
         private void SiftUp(int index)
@@ -99,7 +98,7 @@ namespace EdwardsLabyrinth
                 childIndex1 = (2 * parentIndex) + 1;
                 childIndex2 = (2 * parentIndex) + 2;
 
-                if (childIndex2 < _size)
+                if (childIndex2 < Count)
                 {
                     var parent = _heap[parentIndex];
                     var child1 = _heap[childIndex1];
@@ -126,7 +125,7 @@ namespace EdwardsLabyrinth
                         }
                     }
                 }
-                else if (childIndex1 < _size)
+                else if (childIndex1 < Count)
                 {
                     var parent = _heap[parentIndex];
                     var child1 = _heap[childIndex1];
