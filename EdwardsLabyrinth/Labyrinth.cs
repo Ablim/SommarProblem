@@ -134,7 +134,7 @@ namespace EdwardsLabyrinth
         {
             CreateGraph();
 
-            var nodesToTest = new PriorityQueueWithList<int, int>();
+            var nodesToTest = new PriorityQueueWithHeap<int, int>();
             nodesToTest.Add(_startID, 0);
 
             var costLookup = new Dictionary<int, (int from, int cost)>();
