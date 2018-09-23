@@ -146,6 +146,10 @@ namespace EdwardsLabyrinth
             {
                 var nodeToTest = nodesToTest.GetMin();
                 var nodeID = nodeToTest.key;
+
+                if (nodeID == _endID)
+                    break;
+
                 visitedNodes.Add(nodeID);
                 var nodeCoordinates = _coordinateLookup[nodeID];
                 var nodeCost = costLookup[nodeID].cost;
