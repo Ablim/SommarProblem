@@ -1,1 +1,1 @@
-type Map3.txt | dotnet run --project EdwardsLabyrinth\EdwardsLabyrinth.csproj
+type Map.txt | dotnet run --project EdwardsLabyrinth\EdwardsLabyrinth.csproj
