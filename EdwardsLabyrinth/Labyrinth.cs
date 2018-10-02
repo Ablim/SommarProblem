@@ -198,7 +198,7 @@ namespace EdwardsLabyrinth
                 var nextCoordinates = _coordinateLookup[nextID];
                 var nextIsTeleporter = Utils.IsTeleporter(_map[nextCoordinates.row, nextCoordinates.col]);
 
-                if (!nextIsTeleporter || !isTeleporter)
+                if (!nextIsTeleporter || !isTeleporter || _map[coordinates.row, coordinates.col] != _map[nextCoordinates.row, nextCoordinates.col])
                     result.Insert(0, GetDirection(nextCoordinates, coordinates));
 
                 id = nextID;
