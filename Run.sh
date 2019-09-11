@@ -1,1 +1,2 @@
-cat Map.txt | dotnet run --project EdwardsLabyrinth/EdwardsLabyrinth.csproj
+dotnet build
+cat Map3.txt | dotnet run --project EdwardsLabyrinth/EdwardsLabyrinth.csproj
