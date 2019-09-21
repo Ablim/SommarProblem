@@ -1,1 +1,0 @@
-type Map.txt | dotnet run --project EdwardsLabyrinth\EdwardsLabyrinth.csproj
