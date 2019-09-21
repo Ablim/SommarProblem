@@ -1,6 +1,10 @@
 ﻿open System
 
-
+let rec search grid x y word =
+    match word with
+    | [] -> true
+    | head :: tail -> 
+        search grid x y tail
 
 [<EntryPoint>]
 let main argv =
