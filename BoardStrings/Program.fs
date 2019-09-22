@@ -1,15 +1,45 @@
 ﻿open System
 
-let rec search grid x y word =
+let isValid (grid : char[][]) row col =
+    row >= 0 &&
+    row < grid.Length &&
+    col >= 0 &&
+    col < grid.[row].Length
+
+let rec search grid row col word =
     match word with
     | [] -> true
     | head :: tail -> 
-        search grid x y tail
+        if not (isValid grid row col) then
+            false
+        else if not (grid.[row].[col].Equals head) then
+            false
+        else
+            search grid (row - 1) (col - 1) tail ||
+            search grid (row - 1) col tail ||
+            search grid (row - 1) (col + 1) tail ||
+            search grid row (col - 1) tail ||
+            search grid row (col + 1) tail ||
+            search grid (row + 1) (col - 1) tail ||
+            search grid (row + 1) col tail ||
+            search grid (row + 1) (col + 1) tail
 
 [<EntryPoint>]
 let main argv =
-    printf("Hello")
+    printfn "Hello"
+    
+    let arr1 = [| 'A'; 'P' |]
+    let arr2 = [| 'B'; 'U' |]
+    let arr3 = [| 'U' |]
+
+    let matrix = [| arr1; arr2; arr3|]
+
+    printfn "%b" (search matrix 0 0 ['A'; 'P'; 'A'])
+
     0
+
+
+
 
 (*
     for each string s
