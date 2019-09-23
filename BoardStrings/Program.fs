@@ -1,4 +1,5 @@
 ﻿open System
+open Constants
 
 let isValid (grid : char[][]) row col =
     row >= 0 &&
@@ -24,10 +25,20 @@ let rec search grid row col word =
             search grid (row + 1) col tail ||
             search grid (row + 1) (col + 1) tail
 
+//let readBoard =
+//    while true do
+//        let row = Console.ReadLine()
+
+//    [||]
+
 [<EntryPoint>]
 let main argv =
     printfn "Hello"
     
+    let apa = "APA"
+    let apaList = List.ofSeq apa
+    let apaArray = Array.ofSeq apa
+
     let arr1 = [| 'A'; 'P' |]
     let arr2 = [| 'B'; 'U' |]
     let arr3 = [| 'U' |]
