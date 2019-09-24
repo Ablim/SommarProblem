@@ -1,6 +1,10 @@
 ﻿module Constants
 
-let boardStart = "BOARD START"
-let boardEnd = "BOARD END"
-let listStart = "LIST START"
-let listEnd = "LIST END"
+[<Literal>]
+let BoardStart = "BOARD START"
+[<Literal>]
+let BoardEnd = "BOARD END"
+[<Literal>]
+let ListStart = "LIST START"
+[<Literal>]
+let ListEnd = "LIST END"
