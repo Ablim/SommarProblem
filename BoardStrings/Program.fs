@@ -1,5 +1,6 @@
 ﻿open System
 open Constants
+open System.Diagnostics
 
 let isValid (grid : char[][]) row col =
     row >= 0 &&
@@ -55,14 +56,23 @@ let rec readWordsAsList (data : string list) read =
 
 [<EntryPoint>]
 let main argv =
+    let timer = new Stopwatch()
+    timer.Start()
+    
     let board = readBoard
     let words = readWordsAsList [] false
 
-    for w in words do
-        for i = 0 to (board.Length - 1) do
-            for j = 0 to (board.[i].Length - 1) do
+    timer.Stop()
+    printfn "Input time: %i ms" timer.ElapsedMilliseconds
+    timer.Restart()
+
+    for i = 0 to (board.Length - 1) do
+        for j = 0 to (board.[i].Length - 1) do
+            for w in words do
                 let exists = search board i j (List.ofSeq w)
                 if exists then
                     printfn "%s" w
     
+    timer.Stop()
+    printfn "Execution time: %i ms" timer.ElapsedMilliseconds
     0
