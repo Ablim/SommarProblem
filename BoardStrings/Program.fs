@@ -80,21 +80,21 @@ let wordExistsOnBoard board word =
 
 [<EntryPoint>]
 let main argv =
-    //let timer = new Stopwatch()
-    //timer.Start()
+    let timer = new Stopwatch()
+    timer.Start()
     
     let board = getBoard
     let words = getWords
 
-    //timer.Stop()
-    //printfn "Input time: %i ms" timer.ElapsedMilliseconds
-    //timer.Restart()
+    timer.Stop()
+    printfn "Input time: %i ms" timer.ElapsedMilliseconds
+    timer.Restart()
 
     for w in words do
         let exists = wordExistsOnBoard board w
         if exists then
             printfn "%s" w
     
-    //timer.Stop()
-    //printfn "Execution time: %i ms" timer.ElapsedMilliseconds
+    timer.Stop()
+    printfn "Execution time: %i ms" timer.ElapsedMilliseconds
     0
